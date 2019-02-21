@@ -110,6 +110,20 @@ public class Beer {
         this.brewery = brewery;
     }
 
+    public static Beer getDummyBeer(String id) {
+        for(Beer beer : getDummyBeers()) {
+            if(beer.getId().equals(id)) {
+                return beer;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return id;
+    }
+
     public static ArrayList<Beer> getDummyBeers() {
         ArrayList<Beer> beers = new ArrayList<>();
         beers.add(new Beer("c9u7Eo", "Guinness Generous Ale", "Irish-Style Red Ale", "Inspired by Arthur’s philanthropic legacy and devotion to generous, full-flavored beers, Guinness Generous Ale is special edition holiday beer that was developed in a traditional winter ale style, but with more body and the distinct roast for which Guinness Draught is known. With a rich amber appearance, the vanilla notes accent Guinness Generous Ale’s silky, yet vibrant taste.", 5.6, 20, 28, 11, 18, "Guinness"));
