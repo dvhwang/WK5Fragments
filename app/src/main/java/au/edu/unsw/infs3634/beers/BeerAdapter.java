@@ -10,10 +10,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import au.edu.unsw.infs3634.beers.Entities.Beer;
 
 public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.BeerViewHolder> {
     private MainActivity mParentActivity;
-    private ArrayList<Beer> mBeers;
+    private List<Beer> mBeers;
     private boolean mTwoPane;
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
@@ -34,7 +37,7 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.BeerViewHolder
         }
     };
 
-    public BeerAdapter(MainActivity parent, ArrayList<Beer> beers, boolean twoPane) {
+    public BeerAdapter(MainActivity parent, List<Beer> beers, boolean twoPane) {
         mParentActivity = parent;
         mBeers = beers;
         mTwoPane = twoPane;
@@ -61,7 +64,9 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.BeerViewHolder
     public void onBindViewHolder(BeerViewHolder holder, int position) {
         Beer beer = mBeers.get(position);
         holder.name.setText(beer.getName());
-        holder.shortDescription.setText(beer.getShortDescription());
+        if(beer.getStyle() != null) {
+            holder.shortDescription.setText(beer.getStyle().getName());
+        }
         holder.itemView.setTag(beer);
         holder.itemView.setOnClickListener(mOnClickListener);
     }

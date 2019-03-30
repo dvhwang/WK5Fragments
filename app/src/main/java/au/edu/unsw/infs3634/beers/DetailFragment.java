@@ -10,6 +10,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
+import java.util.List;
+
+import au.edu.unsw.infs3634.beers.Entities.Beer;
+import au.edu.unsw.infs3634.beers.Entities.BreweryDBResponse;
+
 public class DetailFragment extends Fragment {
     public static final String ARG_ITEM_ID = "item_id";
     private Beer mBeer;
@@ -21,7 +28,14 @@ public class DetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if(getArguments().containsKey(ARG_ITEM_ID)) {
-            mBeer = Beer.getDummyBeer(getArguments().getString(ARG_ITEM_ID));
+            Gson gson = new Gson();
+            BreweryDBResponse response = gson.fromJson(BreweryDBResponse.json, BreweryDBResponse.class);
+            List<Beer> beers = response.getData();
+            for(Beer beer : beers) {
+                if(beer.getId().equals(getArguments().getString(ARG_ITEM_ID))) {
+                    mBeer = beer;
+                }
+            }
             this.getActivity().setTitle(mBeer.getName());
         }
     }
@@ -32,12 +46,13 @@ public class DetailFragment extends Fragment {
 
         if(mBeer != null) {
             ((TextView) rootView.findViewById(R.id.tvName)).setText(mBeer.getName());
-            ((TextView) rootView.findViewById(R.id.tvShortDescription)).setText(mBeer.getShortDescription());
+            if(mBeer.getStyle() != null) {
+                ((TextView) rootView.findViewById(R.id.tvShortDescription)).setText(mBeer.getStyle().getName());
+                ((TextView) rootView.findViewById(R.id.tvIBU)).setText("IBU: " + mBeer.getStyle().getIbuMin() + " - " + mBeer.getStyle().getIbuMax());
+                ((TextView) rootView.findViewById(R.id.tvSRM)).setText("SRM: " + mBeer.getStyle().getSrmMin() + " - " + mBeer.getStyle().getSrmMax());
+            }
             ((TextView) rootView.findViewById(R.id.tvDescription)).setText(mBeer.getDescription());
             ((TextView) rootView.findViewById(R.id.tvABV)).setText(String.valueOf(mBeer.getAbv()) + "%");
-            ((TextView) rootView.findViewById(R.id.tvIBU)).setText("IBU: " + mBeer.getIbuMin() + " - " + mBeer.getIbuMax());
-            ((TextView) rootView.findViewById(R.id.tvSRM)).setText("SRM: " + mBeer.getSrmMin() + " - " + mBeer.getSrmMax());
-            ((TextView) rootView.findViewById(R.id.tvBrewery)).setText(mBeer.getBrewery());
             ((Button) rootView.findViewById(R.id.btSearch)).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
