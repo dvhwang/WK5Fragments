@@ -77,4 +77,9 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.BeerViewHolder
         return mBeers.size();
     }
 
+    public void setBeers(List<Beer> beers) {
+        mBeers.clear();
+        mBeers.addAll(beers);
+    }
+
 }

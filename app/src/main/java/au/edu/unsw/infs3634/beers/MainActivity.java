@@ -5,15 +5,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import com.google.gson.Gson;
-
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import au.edu.unsw.infs3634.beers.Entities.Beer;
 import au.edu.unsw.infs3634.beers.Entities.BreweryDBResponse;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     private boolean mTwoPane;
+    private BeerAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +33,21 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-
-        Gson gson = new Gson();
-        BreweryDBResponse response = gson.fromJson(BreweryDBResponse.json, BreweryDBResponse.class);
-        List<Beer> beers = response.getData();
-
-        RecyclerView.Adapter mAdapter = new BeerAdapter(this, beers, mTwoPane);
+        mAdapter = new BeerAdapter(this, new ArrayList<Beer>(), mTwoPane);
         mRecyclerView.setAdapter(mAdapter);
+
+        try {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("https://sandbox-api.brewerydb.com/v2/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            BeerService service = retrofit.create(BeerService.class);
+            Call<BreweryDBResponse> beersCall = service.getBeers();
+            Response<BreweryDBResponse> beerResponse = beersCall.execute();
+            List<Beer> beers = beerResponse.body().getData();
+            mAdapter.setBeers(beers);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
