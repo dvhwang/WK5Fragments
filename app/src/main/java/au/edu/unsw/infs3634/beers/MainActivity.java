@@ -1,5 +1,6 @@
 package au.edu.unsw.infs3634.beers;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -36,18 +37,32 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new BeerAdapter(this, new ArrayList<Beer>(), mTwoPane);
         mRecyclerView.setAdapter(mAdapter);
 
-        try {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://sandbox-api.brewerydb.com/v2/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            BeerService service = retrofit.create(BeerService.class);
-            Call<BreweryDBResponse> beersCall = service.getBeers();
-            Response<BreweryDBResponse> beerResponse = beersCall.execute();
-            List<Beer> beers = beerResponse.body().getData();
+        new GetBeerTask().execute();
+    }
+
+    private class GetBeerTask extends AsyncTask<Void, Void, List<Beer>> {
+        @Override
+        protected List<Beer> doInBackground(Void... voids) {
+            try {
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl("https://sandbox-api.brewerydb.com/v2/")
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+                BeerService service = retrofit.create(BeerService.class);
+                Call<BreweryDBResponse> beersCall = service.getBeers();
+                Response<BreweryDBResponse> beerResponse = beersCall.execute();
+                List<Beer> beers = beerResponse.body().getData();
+                return beers;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(List<Beer> beers) {
             mAdapter.setBeers(beers);
-        } catch (IOException e) {
-            e.printStackTrace();
+            mAdapter.notifyDataSetChanged();
         }
     }
 }
