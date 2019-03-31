@@ -1,5 +1,6 @@
 package au.edu.unsw.infs3634.beers;
 
+import android.arch.persistence.room.Room;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
     private boolean mTwoPane;
     private BeerAdapter mAdapter;
+    private BeerDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +38,9 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new BeerAdapter(this, new ArrayList<Beer>(), mTwoPane);
         mRecyclerView.setAdapter(mAdapter);
+        mDb = Room.databaseBuilder(getApplicationContext(), BeerDatabase.class, "beers-database").build();
 
+        new GetBeerDBTask().execute();
         new GetBeerTask().execute();
     }
 
@@ -52,11 +56,27 @@ public class MainActivity extends AppCompatActivity {
                 Call<BreweryDBResponse> beersCall = service.getBeers();
                 Response<BreweryDBResponse> beerResponse = beersCall.execute();
                 List<Beer> beers = beerResponse.body().getData();
+                mDb.beerDao().deleteAll(mDb.beerDao().getBeers().toArray(new Beer[mDb.beerDao().getBeers().size()]));
+                mDb.beerDao().insertAll(beers.toArray(new Beer[beers.size()]));
                 return beers;
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
             }
+        }
+
+        @Override
+        protected void onPostExecute(List<Beer> beers) {
+            mAdapter.setBeers(beers);
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private class GetBeerDBTask extends AsyncTask<Void, Void, List<Beer>> {
+
+        @Override
+        protected List<Beer> doInBackground(Void... voids) {
+            return mDb.beerDao().getBeers();
         }
 
         @Override

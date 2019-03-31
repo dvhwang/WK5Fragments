@@ -1,9 +1,17 @@
 package au.edu.unsw.infs3634.beers.Entities;
 
+import android.arch.persistence.room.Embedded;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+@Entity
 public class Beer {
+    @PrimaryKey
+    @NonNull
     @SerializedName("id")
     @Expose
     private String id;
@@ -40,6 +48,7 @@ public class Beer {
     @SerializedName("year")
     @Expose
     private Integer year;
+    @Embedded(prefix = "labels_")
     @SerializedName("labels")
     @Expose
     private Labels labels;
@@ -58,12 +67,15 @@ public class Beer {
     @SerializedName("updateDate")
     @Expose
     private String updateDate;
+    @Embedded(prefix = "glass_")
     @SerializedName("glass")
     @Expose
     private Glass glass;
+    @Embedded(prefix = "available_")
     @SerializedName("available")
     @Expose
     private Available available;
+    @Embedded(prefix = "style_")
     @SerializedName("style")
     @Expose
     private Style style;

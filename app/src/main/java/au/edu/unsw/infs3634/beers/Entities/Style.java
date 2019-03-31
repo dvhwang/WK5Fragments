@@ -1,5 +1,7 @@
 package au.edu.unsw.infs3634.beers.Entities;
 
+import android.arch.persistence.room.Embedded;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,6 +12,7 @@ public class Style {
     @SerializedName("categoryId")
     @Expose
     private Integer categoryId;
+    @Embedded(prefix = "category_")
     @SerializedName("category")
     @Expose
     private Category category;

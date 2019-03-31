@@ -1,5 +1,6 @@
 package au.edu.unsw.infs3634.beers;
 
+import android.arch.persistence.room.Room;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -24,14 +25,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class DetailFragment extends Fragment {
     public static final String ARG_ITEM_ID = "item_id";
     private Beer mBeer;
+    private BeerDatabase mDb;
 
     public DetailFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mDb = Room.databaseBuilder(getContext(), BeerDatabase.class, "beers-database").build();
 
         if(getArguments().containsKey(ARG_ITEM_ID)) {
+            new GetBeerDBTask().execute();
             new GetBeerTask().execute();
         }
     }
@@ -80,11 +84,31 @@ public class DetailFragment extends Fragment {
                 Call<BreweryDBResponse> beersCall = service.getBeers();
                 Response<BreweryDBResponse> beerResponse = beersCall.execute();
                 List<Beer> beers = beerResponse.body().getData();
+                mDb.beerDao().deleteAll(mDb.beerDao().getBeers().toArray(new Beer[mDb.beerDao().getBeers().size()]));
+                mDb.beerDao().insertAll(beers.toArray(new Beer[beers.size()]));
                 return beers;
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
             }
+        }
+
+        @Override
+        protected void onPostExecute(List<Beer> beers) {
+            for(Beer beer : beers) {
+                if(beer.getId().equals(getArguments().getString(ARG_ITEM_ID))) {
+                    mBeer = beer;
+                    updateUi();
+                }
+            }
+        }
+    }
+
+    private class GetBeerDBTask extends AsyncTask<Void, Void, List<Beer>> {
+
+        @Override
+        protected List<Beer> doInBackground(Void... voids) {
+            return mDb.beerDao().getBeers();
         }
 
         @Override
